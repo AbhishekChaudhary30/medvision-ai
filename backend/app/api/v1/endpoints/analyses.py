@@ -1,17 +1,22 @@
 """Analyses and Prediction endpoints."""
 
-from typing import Annotated
+from datetime import UTC, datetime
+from pathlib import Path
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Response
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.analysis import Analysis, AnalysisArtifact
 from app.models.user import User, UserRole
-from app.schemas.analysis import AnalysisListResponse, AnalysisResponse, ExplanationRequest, ReviewRequest
+from app.schemas.analysis import (
+    AnalysisListResponse,
+    AnalysisResponse,
+    ExplanationRequest,
+    ReviewRequest,
+)
 from app.services.ml_service import process_and_predict, process_explainability, save_upload_file
 from app.services.report_service import generate_analysis_report
 
@@ -49,13 +54,13 @@ def submit_analysis(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
-        )
-    except Exception as e:
+        ) from e
+    except Exception:
         saved_path.unlink(missing_ok=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Inference engine failed"
-        )
+        ) from None
         
     # Persist the analysis
     analysis = Analysis(
@@ -143,12 +148,12 @@ def explain_analysis(
         
     try:
         explanation_result = process_explainability(
-            file_path=original_artifact.file_path,
+            file_path=Path(original_artifact.file_path),
             target_class=analysis.predicted_class_index,
             method=request.method
         )
     except Exception:
-        raise HTTPException(status_code=500, detail="Explainability engine failed")
+        raise HTTPException(status_code=500, detail="Explainability engine failed") from None
         
     if not explanation_result:
         raise HTTPException(status_code=500, detail="Explainability method returned None")
@@ -191,7 +196,7 @@ def review_analysis(
     analysis.review_status = request.review_status
     analysis.reviewer_notes = request.reviewer_notes
     analysis.reviewer_id = current_user.id
-    analysis.reviewed_at = datetime.utcnow()
+    analysis.reviewed_at = datetime.now(UTC)
     
     db.commit()
     db.refresh(analysis)

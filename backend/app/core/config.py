@@ -21,6 +21,10 @@ class Settings(BaseSettings):
         default="postgresql+psycopg://medvision_app@localhost:5432/medvision_ai",
         description="SQLAlchemy PostgreSQL database URL.",
     )
+    cors_origins: list[str] = Field(
+        default=["http://localhost:3000", "http://localhost:80", "http://localhost"],
+        description="Allowed CORS origins.",
+    )
 
     jwt_secret_key: str = Field(
         default="09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7",

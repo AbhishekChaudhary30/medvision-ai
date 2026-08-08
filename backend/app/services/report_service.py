@@ -1,13 +1,12 @@
 """Report generation service."""
 
 import io
-from pathlib import Path
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from app.models.analysis import Analysis
 
@@ -32,7 +31,6 @@ def generate_analysis_report(analysis: Analysis) -> bytes:
     title_style.alignment = 1  # Center
     
     h2_style = styles["Heading2"]
-    normal_style = styles["Normal"]
     
     disclaimer_style = ParagraphStyle(
         "Disclaimer",

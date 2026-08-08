@@ -1,11 +1,9 @@
 """ML Service adapter bridging Phase 4 engine with API layer."""
 
 import logging
-import os
 import shutil
 import uuid
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image, UnidentifiedImageError
 
@@ -15,7 +13,7 @@ from ml.inference.engine import InferenceEngine
 logger = logging.getLogger(__name__)
 
 # Singleton instance of the engine
-_engine: Optional[InferenceEngine] = None
+_engine: InferenceEngine | None = None
 
 UPLOAD_DIR = Path("data/uploads")
 ARTIFACT_DIR = Path("data/artifacts")
@@ -54,7 +52,7 @@ def process_and_predict(file_path: Path, sample_id: str) -> dict:
         image.verify()
         image = Image.open(file_path) # Reload after verify
     except UnidentifiedImageError:
-        raise ValueError("Invalid image file format")
+        raise ValueError("Invalid image file format") from None
         
     result = engine.predict(image=image, sample_id=sample_id, explain=False)
     
@@ -81,9 +79,9 @@ def process_explainability(file_path: Path, target_class: int, method: str = "gr
     
     try:
         image = Image.open(file_path)
-        image = image.convert("RGB")
+        image = image.convert("RGB")  # type: ignore
     except UnidentifiedImageError:
-        raise ValueError("Invalid image file format")
+        raise ValueError("Invalid image file format") from None
         
     # We call predict with explain=True
     result = engine.predict(image=image, sample_id="explain", explain=True, explain_method=method)

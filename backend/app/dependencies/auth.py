@@ -15,7 +15,7 @@ from app.models.user import User
 
 logger = logging.getLogger(__name__)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 def get_current_user(
@@ -37,7 +37,7 @@ def get_current_user(
         user_id = UUID(user_id_str)
     except (jwt.InvalidTokenError, ValueError) as e:
         logger.debug("JWT validation failed: %s", e)
-        raise credentials_exception
+        raise credentials_exception from e
 
     user = db.get(User, user_id)
     if user is None:

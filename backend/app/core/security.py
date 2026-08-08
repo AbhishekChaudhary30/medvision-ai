@@ -1,6 +1,6 @@
 """Security and Authentication utilities."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -33,9 +33,9 @@ def create_access_token(subject: str | Any, expires_delta: timedelta | None = No
         expires_delta: Optional custom expiration timedelta.
     """
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
+        expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
         
     to_encode = {"exp": expire, "sub": str(subject)}
     

@@ -3,6 +3,8 @@
 from fastapi.testclient import TestClient
 
 
+from app.core.config import get_settings
+
 def test_health_endpoint(client: TestClient) -> None:
     response = client.get("/api/v1/health")
 
@@ -10,6 +12,6 @@ def test_health_endpoint(client: TestClient) -> None:
     assert response.json() == {
         "status": "healthy",
         "service": "MedVision AI",
-        "environment": "test",
+        "environment": get_settings().environment,
         "version": "0.1.0",
     }
