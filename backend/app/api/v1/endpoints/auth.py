@@ -42,7 +42,7 @@ def login(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user")
 
     access_token = create_access_token(subject=user.id)
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer"}  # nosec B105
 
 
 @router.get("/me", response_model=UserResponse)
