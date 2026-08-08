@@ -10,6 +10,16 @@ from app.core.logging import configure_logging, get_logger
 logger = get_logger(__name__)
 
 
+from contextlib import asynccontextmanager
+
+from app.services.ml_service import initialize_engine
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events."""
+    initialize_engine(strict=False) # Use False for easy dev start
+    yield
+
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     settings = get_settings()
@@ -19,6 +29,7 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         version=settings.app_version,
         description="Research and educational clinical decision-support prototype.",
+        lifespan=lifespan
     )
     register_exception_handlers(application)
     application.include_router(api_router, prefix=settings.api_v1_prefix)
