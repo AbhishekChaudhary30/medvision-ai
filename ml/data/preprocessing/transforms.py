@@ -16,16 +16,18 @@ def get_train_transforms(
     std: list[float] = IMAGENET_STD,
 ) -> transforms.Compose:
     """Conservative data augmentation for medical images."""
-    return transforms.Compose([
-        # Convert grayscale to RGB if needed (done at Dataset level, but safe to enforce)
-        transforms.Resize(target_size, antialias=True),
-        transforms.RandomRotation(degrees=5),
-        transforms.RandomAffine(degrees=0, translate=(0.05, 0.05), scale=(0.95, 1.05)),
-        transforms.ColorJitter(brightness=0.1, contrast=0.1),
-        transforms.ToImage(),
-        transforms.ToDtype(import_torch().float32, scale=True),
-        transforms.Normalize(mean=mean, std=std),
-    ])
+    return transforms.Compose(
+        [
+            # Convert grayscale to RGB if needed (done at Dataset level, but safe to enforce)
+            transforms.Resize(target_size, antialias=True),
+            transforms.RandomRotation(degrees=5),
+            transforms.RandomAffine(degrees=0, translate=(0.05, 0.05), scale=(0.95, 1.05)),
+            transforms.ColorJitter(brightness=0.1, contrast=0.1),
+            transforms.ToImage(),
+            transforms.ToDtype(import_torch().float32, scale=True),
+            transforms.Normalize(mean=mean, std=std),
+        ]
+    )
 
 
 def get_val_transforms(
@@ -34,12 +36,14 @@ def get_val_transforms(
     std: list[float] = IMAGENET_STD,
 ) -> transforms.Compose:
     """Deterministic validation transformations."""
-    return transforms.Compose([
-        transforms.Resize(target_size, antialias=True),
-        transforms.ToImage(),
-        transforms.ToDtype(import_torch().float32, scale=True),
-        transforms.Normalize(mean=mean, std=std),
-    ])
+    return transforms.Compose(
+        [
+            transforms.Resize(target_size, antialias=True),
+            transforms.ToImage(),
+            transforms.ToDtype(import_torch().float32, scale=True),
+            transforms.Normalize(mean=mean, std=std),
+        ]
+    )
 
 
 def get_test_transforms(
@@ -48,15 +52,18 @@ def get_test_transforms(
     std: list[float] = IMAGENET_STD,
 ) -> transforms.Compose:
     """Deterministic test transformations."""
-    return transforms.Compose([
-        transforms.Resize(target_size, antialias=True),
-        transforms.ToImage(),
-        transforms.ToDtype(import_torch().float32, scale=True),
-        transforms.Normalize(mean=mean, std=std),
-    ])
+    return transforms.Compose(
+        [
+            transforms.Resize(target_size, antialias=True),
+            transforms.ToImage(),
+            transforms.ToDtype(import_torch().float32, scale=True),
+            transforms.Normalize(mean=mean, std=std),
+        ]
+    )
 
 
 def import_torch():
     """Helper to lazy-import torch to avoid circular imports during setup."""
     import torch
+
     return torch

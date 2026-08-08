@@ -11,7 +11,7 @@ from app.schemas.user import UserCreate, UserUpdate
 def create_user(db: Session, user_create: UserCreate) -> User | None:
     """Create a new user. Returns None if email already exists."""
     hashed_password = get_password_hash(user_create.password)
-    
+
     db_user = User(
         email=user_create.email,
         password_hash=hashed_password,
@@ -37,7 +37,7 @@ def update_user(db: Session, user: User, update_data: UserUpdate) -> User:
         user.role = update_data.role
     if update_data.is_active is not None:
         user.is_active = update_data.is_active
-        
+
     db.commit()
     db.refresh(user)
     return user

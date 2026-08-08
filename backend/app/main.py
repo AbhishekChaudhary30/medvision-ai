@@ -15,12 +15,12 @@ from app.services.ml_service import initialize_engine
 logger = get_logger(__name__)
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
-    initialize_engine(strict=False) # Use False for easy dev start
+    initialize_engine(strict=False)  # Use False for easy dev start
     yield
+
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
@@ -31,10 +31,10 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         version=settings.app_version,
         description="Research and educational clinical decision-support prototype.",
-        lifespan=lifespan
+        lifespan=lifespan,
     )
     register_exception_handlers(application)
-    
+
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
     )
 
     application.include_router(api_router, prefix=settings.api_v1_prefix)
-    
+
     # Expose Prometheus metrics
     Instrumentator().instrument(application).expose(application, endpoint="/metrics")
 

@@ -9,12 +9,13 @@ DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 def configure_logging(log_level: str = "INFO", environment: str = "local") -> None:
     """Configure timestamped application logging."""
-    
+
     handlers: list[logging.Handler] = []
-    
+
     if environment == "production":
         try:
             from pythonjsonlogger.json import JsonFormatter
+
             handler = logging.StreamHandler(sys.stdout)
             formatter = JsonFormatter(
                 "%(asctime)s %(levelname)s %(name)s %(message)s",
@@ -28,7 +29,7 @@ def configure_logging(log_level: str = "INFO", environment: str = "local") -> No
             handlers.append(handler)
     else:
         handlers.append(logging.StreamHandler(sys.stdout))
-        
+
     logging.basicConfig(
         level=log_level.upper(),
         format=DEFAULT_LOG_FORMAT if environment != "production" else None,

@@ -27,7 +27,7 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(subject: str | Any, expires_delta: timedelta | None = None) -> str:
     """Create a signed JWT access token.
-    
+
     Args:
         subject: The user ID or unique subject identifier.
         expires_delta: Optional custom expiration timedelta.
@@ -36,25 +36,17 @@ def create_access_token(subject: str | Any, expires_delta: timedelta | None = No
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
-        
+
     to_encode = {"exp": expire, "sub": str(subject)}
-    
-    encoded_jwt = jwt.encode(
-        to_encode, 
-        settings.jwt_secret_key, 
-        algorithm=settings.jwt_algorithm
-    )
+
+    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
     """Decode and verify a JWT access token.
-    
+
     Raises:
         jwt.InvalidTokenError: If the token is invalid, expired, or malformed.
     """
-    return jwt.decode(
-        token, 
-        settings.jwt_secret_key, 
-        algorithms=[settings.jwt_algorithm]
-    )
+    return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         description="SQLAlchemy PostgreSQL database URL.",
     )
     cors_origins: list[str] = Field(
-        default=["http://localhost:3000", "http://localhost:80", "http://localhost"],
+        default=["http://localhost:3000", "http://localhost:80", "http://localhost", "http://127.0.0.1:5173", "http://localhost:5173"],
         description="Allowed CORS origins.",
     )
 

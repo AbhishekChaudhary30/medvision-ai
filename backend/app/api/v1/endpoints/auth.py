@@ -17,17 +17,11 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def register(
-    user_create: UserCreate, 
-    db: Annotated[Session, Depends(get_db)]
-):
+def register(user_create: UserCreate, db: Annotated[Session, Depends(get_db)]):
     """Register a new user."""
     user = create_user(db, user_create)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered"
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     return user
 
 
@@ -45,11 +39,8 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Inactive user"
-        )
-        
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user")
+
     access_token = create_access_token(subject=user.id)
     return {"access_token": access_token, "token_type": "bearer"}
 

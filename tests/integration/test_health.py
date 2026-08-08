@@ -1,9 +1,8 @@
 """Health endpoint tests."""
 
+from app.core.config import get_settings
 from fastapi.testclient import TestClient
 
-
-from app.core.config import get_settings
 
 def test_health_endpoint(client: TestClient) -> None:
     response = client.get("/api/v1/health")

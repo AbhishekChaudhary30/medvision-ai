@@ -18,6 +18,7 @@ _engine: InferenceEngine | None = None
 UPLOAD_DIR = Path("data/uploads")
 ARTIFACT_DIR = Path("data/artifacts")
 
+
 def initialize_engine(checkpoint_dir: str = "models/checkpoints", strict: bool = True):
     """Load the ML engine once at application startup."""
     global _engine
@@ -26,11 +27,11 @@ def initialize_engine(checkpoint_dir: str = "models/checkpoints", strict: bool =
         checkpoint_path = Path(checkpoint_dir)
         bundle = ModelBundle(checkpoint_path)
         _engine = InferenceEngine(bundle, strict=strict)
-        
+
         # Ensure directories exist
         UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
         ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
-        
+
         logger.info("ML Engine initialized successfully.")
 
 
@@ -45,17 +46,17 @@ def get_engine() -> InferenceEngine:
 def process_and_predict(file_path: Path, sample_id: str) -> dict:
     """Run prediction on the given image file using Phase 4 engine."""
     engine = get_engine()
-    
+
     try:
         image = Image.open(file_path)
         # Ensure it's fully loaded and validated
         image.verify()
-        image = Image.open(file_path) # Reload after verify
+        image = Image.open(file_path)  # Reload after verify
     except UnidentifiedImageError:
         raise ValueError("Invalid image file format") from None
-        
+
     result = engine.predict(image=image, sample_id=sample_id, explain=False)
-    
+
     return {
         "model_version": engine.bundle.metadata.get("version", "v1.0"),
         "model_architecture": engine.architecture,
@@ -64,7 +65,7 @@ def process_and_predict(file_path: Path, sample_id: str) -> dict:
         "probability_normal": 1.0 - result.probability if result.class_index == 1 else result.probability,
         "probability_pneumonia": result.probability if result.class_index == 1 else 1.0 - result.probability,
         "confidence": result.confidence_score,
-        "threshold": 0.5, # Default binary threshold
+        "threshold": 0.5,  # Default binary threshold
         "uncertainty_status": "HIGH" if result.entropy > 0.5 else "LOW",
         "entropy": result.entropy,
         "margin": result.margin,
@@ -76,24 +77,24 @@ def process_and_predict(file_path: Path, sample_id: str) -> dict:
 def process_explainability(file_path: Path, target_class: int, method: str = "gradcam") -> dict | None:
     """Run explainability on the image."""
     engine = get_engine()
-    
+
     try:
         image = Image.open(file_path)
         image = image.convert("RGB")  # type: ignore
     except UnidentifiedImageError:
         raise ValueError("Invalid image file format") from None
-        
+
     # We call predict with explain=True
     result = engine.predict(image=image, sample_id="explain", explain=True, explain_method=method)
-    
+
     if result.explanation is None:
         return None
-        
+
     return {
         "heatmap": result.explanation.heatmap,
         "overlay_image_base64": result.explanation.overlay_image_base64,
         "method": result.explanation.method,
-        "target_layer": result.explanation.target_layer
+        "target_layer": result.explanation.target_layer,
     }
 
 
@@ -102,8 +103,8 @@ def save_upload_file(upload_file) -> Path:
     ext = Path(upload_file.filename).suffix
     safe_filename = f"{uuid.uuid4()}{ext}"
     dest_path = UPLOAD_DIR / safe_filename
-    
+
     with dest_path.open("wb") as buffer:
         shutil.copyfileobj(upload_file.file, buffer)
-        
+
     return dest_path

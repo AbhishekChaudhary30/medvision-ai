@@ -1,7 +1,5 @@
 """Evaluation metrics for binary classification."""
 
-from typing import Dict, List, Union
-
 import numpy as np
 from sklearn.metrics import (
     average_precision_score,
@@ -13,18 +11,14 @@ from sklearn.metrics import (
 )
 
 
-def calculate_metrics(
-    y_true: Union[List[int], np.ndarray],
-    y_pred: Union[List[int], np.ndarray],
-    y_prob: Union[List[float], np.ndarray]
-) -> Dict[str, float]:
+def calculate_metrics(y_true: list[int] | np.ndarray, y_pred: list[int] | np.ndarray, y_prob: list[float] | np.ndarray) -> dict[str, float]:
     """Calculate binary classification metrics.
-    
+
     Args:
         y_true: True labels (0 or 1).
         y_pred: Predicted labels (0 or 1).
         y_prob: Predicted probabilities for class 1 (PNEUMONIA).
-        
+
     Returns:
         Dictionary of metrics.
     """
@@ -36,14 +30,14 @@ def calculate_metrics(
     precision = precision_score(y_true, y_pred, zero_division=0)
     recall = recall_score(y_true, y_pred, zero_division=0)
     f1 = f1_score(y_true, y_pred, zero_division=0)
-    
+
     # Probabilistic metrics
     try:
         roc_auc = roc_auc_score(y_true, y_prob)
     except ValueError:
         # Happens if only one class is present in y_true
         roc_auc = 0.5
-        
+
     try:
         pr_auc = average_precision_score(y_true, y_prob)
     except ValueError:
@@ -56,14 +50,14 @@ def calculate_metrics(
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
     else:
         specificity = 0.0
-        
+
     # Accuracy calculation manually for safety
     accuracy = (y_pred == y_true).mean()
-    
+
     return {
         "accuracy": float(accuracy),
         "precision": float(precision),
-        "recall": float(recall),       # aka sensitivity
+        "recall": float(recall),  # aka sensitivity
         "specificity": float(specificity),
         "f1": float(f1),
         "roc_auc": float(roc_auc),

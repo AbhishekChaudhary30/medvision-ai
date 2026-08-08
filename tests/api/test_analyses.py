@@ -8,14 +8,8 @@ from sqlalchemy.orm import Session
 
 def get_token(client: TestClient, email: str = "user@example.com") -> str:
     """Helper to get a token."""
-    client.post(
-        "/api/v1/auth/register",
-        json={"email": email, "password": "password123"}
-    )
-    response = client.post(
-        "/api/v1/auth/login",
-        data={"username": email, "password": "password123"}
-    )
+    client.post("/api/v1/auth/register", json={"email": email, "password": "password123"})
+    response = client.post("/api/v1/auth/login", data={"username": email, "password": "password123"})
     return response.json()["access_token"]
 
 
@@ -23,7 +17,7 @@ def get_token(client: TestClient, email: str = "user@example.com") -> str:
 @patch("app.api.v1.endpoints.analyses.save_upload_file")
 def test_submit_analysis(mock_save, mock_predict, client: TestClient, db_session: Session, tmp_path):
     token = get_token(client)
-    
+
     mock_save.return_value = tmp_path / "dummy.jpg"
     mock_predict.return_value = {
         "model_version": "v1.0",
@@ -40,13 +34,11 @@ def test_submit_analysis(mock_save, mock_predict, client: TestClient, db_session
         "calibration_status": "UNAVAILABLE",
         "inference_time": 150.0,
     }
-    
+
     response = client.post(
-        "/api/v1/analyses",
-        headers={"Authorization": f"Bearer {token}"},
-        files={"file": ("test.jpg", b"dummy image content", "image/jpeg")}
+        "/api/v1/analyses", headers={"Authorization": f"Bearer {token}"}, files={"file": ("test.jpg", b"dummy image content", "image/jpeg")}
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["predicted_class"] == "PNEUMONIA"
@@ -57,7 +49,7 @@ def test_submit_analysis(mock_save, mock_predict, client: TestClient, db_session
 @patch("app.api.v1.endpoints.analyses.save_upload_file")
 def test_list_analyses(mock_save, mock_predict, client: TestClient, db_session: Session, tmp_path):
     token = get_token(client, "list@example.com")
-    
+
     mock_save.return_value = tmp_path / "dummy.jpg"
     mock_predict.return_value = {
         "model_version": "v1.0",
@@ -74,18 +66,11 @@ def test_list_analyses(mock_save, mock_predict, client: TestClient, db_session: 
         "calibration_status": "UNAVAILABLE",
         "inference_time": 100.0,
     }
-    
-    client.post(
-        "/api/v1/analyses",
-        headers={"Authorization": f"Bearer {token}"},
-        files={"file": ("test.jpg", b"dummy image content", "image/jpeg")}
-    )
-    
-    response = client.get(
-        "/api/v1/analyses",
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    
+
+    client.post("/api/v1/analyses", headers={"Authorization": f"Bearer {token}"}, files={"file": ("test.jpg", b"dummy image content", "image/jpeg")})
+
+    response = client.get("/api/v1/analyses", headers={"Authorization": f"Bearer {token}"})
+
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 1

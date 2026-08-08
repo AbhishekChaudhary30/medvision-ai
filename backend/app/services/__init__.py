@@ -17,5 +17,5 @@ __all__ = [
     "get_engine",
     "process_and_predict",
     "process_explainability",
-    "save_upload_file"
+    "save_upload_file",
 ]

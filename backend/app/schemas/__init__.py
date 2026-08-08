@@ -10,11 +10,11 @@ from app.schemas.user import Token, UserCreate, UserResponse, UserUpdate
 
 __all__ = [
     "UserCreate",
-    "UserResponse", 
+    "UserResponse",
     "UserUpdate",
     "Token",
     "AnalysisResponse",
     "AnalysisArtifactResponse",
     "AnalysisListResponse",
-    "ExplanationRequest"
+    "ExplanationRequest",
 ]

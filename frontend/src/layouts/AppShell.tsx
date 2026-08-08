@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Activity, LayoutDashboard, FileUp, List, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -72,7 +72,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </header>
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-        {children}
+        {children || <Outlet />}
       </main>
     </div>
   );

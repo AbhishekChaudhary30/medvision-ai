@@ -12,8 +12,6 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(analyses.router, prefix="/analyses", tags=["analyses"])
 
 
-
-
 @api_router.get("/health", tags=["health"])
 def health_check() -> dict:
     """Basic health check endpoint."""

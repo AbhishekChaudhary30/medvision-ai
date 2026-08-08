@@ -18,7 +18,7 @@ def test_full_workflow(mock_save, mock_explain, mock_predict, client: TestClient
     4. Request explainability
     5. List history
     """
-    
+
     # Mocks
     mock_save.return_value = tmp_path / "e2e.jpg"
     mock_predict.return_value = {
@@ -40,41 +40,27 @@ def test_full_workflow(mock_save, mock_explain, mock_predict, client: TestClient
         "heatmap": [[0.1, 0.2], [0.3, 0.4]],
         "overlay_image_base64": "dummybase64data",
         "method": "gradcam",
-        "target_layer": "layer4"
+        "target_layer": "layer4",
     }
-    
+
     # 1. Register
-    client.post(
-        "/api/v1/auth/register",
-        json={"email": "e2e@example.com", "password": "password123"}
-    )
-    
+    client.post("/api/v1/auth/register", json={"email": "e2e@example.com", "password": "password123"})
+
     # 2. Login
-    login_resp = client.post(
-        "/api/v1/auth/login",
-        data={"username": "e2e@example.com", "password": "password123"}
-    )
+    login_resp = client.post("/api/v1/auth/login", data={"username": "e2e@example.com", "password": "password123"})
     token = login_resp.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     # 3. Upload image for analysis
-    analysis_resp = client.post(
-        "/api/v1/analyses",
-        headers=headers,
-        files={"file": ("test.jpg", b"dummy", "image/jpeg")}
-    )
+    analysis_resp = client.post("/api/v1/analyses", headers=headers, files={"file": ("test.jpg", b"dummy", "image/jpeg")})
     assert analysis_resp.status_code == 201
     analysis_id = analysis_resp.json()["id"]
-    
+
     # 4. Request explainability
-    explain_resp = client.post(
-        f"/api/v1/analyses/{analysis_id}/explain",
-        headers=headers,
-        json={"method": "gradcam"}
-    )
+    explain_resp = client.post(f"/api/v1/analyses/{analysis_id}/explain", headers=headers, json={"method": "gradcam"})
     assert explain_resp.status_code == 200
     assert explain_resp.json()["explanation_method"] == "gradcam"
-    
+
     # 5. List history
     history_resp = client.get("/api/v1/analyses", headers=headers)
     assert history_resp.status_code == 200

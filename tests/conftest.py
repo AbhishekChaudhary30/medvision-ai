@@ -1,7 +1,7 @@
 """Shared test fixtures for MedVision AI API testing."""
 
 import os
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -15,10 +15,10 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.models.analysis import Analysis, AnalysisArtifact  # noqa
 
 # Import all models so Base.metadata knows about them
 from app.models.user import User  # noqa
-from app.models.analysis import Analysis, AnalysisArtifact  # noqa
 
 engine = create_engine(
     "sqlite:///:memory:",
