@@ -35,10 +35,17 @@ class Analysis(Base):
     inference_time: Mapped[float] = mapped_column(Float, nullable=False)
     explanation_method: Mapped[str | None] = mapped_column(String, nullable=True)
     
+    # Review fields
+    review_status: Mapped[str] = mapped_column(String, default="NOT_REVIEWED", nullable=False)
+    reviewer_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True)
+    reviewer_notes: Mapped[str | None] = mapped_column(String, nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="analyses")
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="analyses")
+    reviewer: Mapped["User"] = relationship("User", foreign_keys=[reviewer_id])
     artifacts: Mapped[list["AnalysisArtifact"]] = relationship(
         "AnalysisArtifact", back_populates="analysis", cascade="all, delete-orphan"
     )

@@ -33,5 +33,5 @@ class User(Base):
 
     # Relationships
     analyses: Mapped[list["Analysis"]] = relationship(
-        "Analysis", back_populates="user", cascade="all, delete-orphan"
+        "Analysis", foreign_keys="[Analysis.user_id]", back_populates="user", cascade="all, delete-orphan"
     )

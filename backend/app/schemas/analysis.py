@@ -42,9 +42,20 @@ class AnalysisResponse(BaseModel):
     explanation_method: str | None = None
     created_at: datetime
     
+    review_status: str
+    reviewer_id: UUID | None = None
+    reviewer_notes: str | None = None
+    reviewed_at: datetime | None = None
+    
     artifacts: list[AnalysisArtifactResponse] = []
     
     model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewRequest(BaseModel):
+    """Schema for submitting a review."""
+    review_status: str = Field(..., description="Status of the review, e.g., REVIEWED, FLAGGED")
+    reviewer_notes: str | None = Field(None, description="Optional notes from the reviewer")
 
 
 class AnalysisListResponse(BaseModel):

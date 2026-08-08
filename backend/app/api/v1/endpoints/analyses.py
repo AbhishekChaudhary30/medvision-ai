@@ -3,15 +3,17 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Response
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.analysis import Analysis, AnalysisArtifact
 from app.models.user import User, UserRole
-from app.schemas.analysis import AnalysisListResponse, AnalysisResponse, ExplanationRequest
+from app.schemas.analysis import AnalysisListResponse, AnalysisResponse, ExplanationRequest, ReviewRequest
 from app.services.ml_service import process_and_predict, process_explainability, save_upload_file
+from app.services.report_service import generate_analysis_report
 
 router = APIRouter()
 
@@ -169,3 +171,54 @@ def explain_analysis(
     # to keep it lightweight, unless specifically requested. But we could include 
     # it in a custom response if needed. For now we just return the updated analysis.
     return analysis
+
+
+@router.post("/{analysis_id}/review", response_model=AnalysisResponse)
+def review_analysis(
+    analysis_id: UUID,
+    request: ReviewRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Submit a human review for an analysis. Requires REVIEWER or ADMIN role."""
+    if current_user.role not in [UserRole.REVIEWER, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Not authorized to perform reviews")
+        
+    analysis = db.get(Analysis, analysis_id)
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+        
+    analysis.review_status = request.review_status
+    analysis.reviewer_notes = request.reviewer_notes
+    analysis.reviewer_id = current_user.id
+    analysis.reviewed_at = datetime.utcnow()
+    
+    db.commit()
+    db.refresh(analysis)
+    
+    return analysis
+
+
+@router.get("/{analysis_id}/report")
+def download_analysis_report(
+    analysis_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download a PDF report for a given analysis."""
+    analysis = db.get(Analysis, analysis_id)
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+        
+    if current_user.role == UserRole.USER and analysis.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this analysis report")
+        
+    pdf_bytes = generate_analysis_report(analysis)
+    
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"
+        }
+    )
