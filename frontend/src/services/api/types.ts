@@ -18,6 +18,10 @@ export interface AnalysisArtifact {
 export interface AnalysisResponse {
   id: string;
   user_id: string;
+  modality: string;
+  patient_age?: number;
+  patient_gender?: string;
+  clinical_notes?: string;
   model_version: string;
   model_architecture: string;
   predicted_class: string;
@@ -32,6 +36,7 @@ export interface AnalysisResponse {
   calibration_status: string;
   inference_time: number;
   explanation_method: string | null;
+  clinical_suggestions: string | null;
   created_at: string;
   
   review_status: string;

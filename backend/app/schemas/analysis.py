@@ -29,6 +29,11 @@ class AnalysisResponse(BaseModel):
 
     id: UUID
     user_id: UUID
+    modality: str
+    patient_age: int | None = None
+    patient_gender: str | None = None
+    clinical_notes: str | None = None
+    
     model_version: str
     model_architecture: str
     predicted_class: str
@@ -43,6 +48,7 @@ class AnalysisResponse(BaseModel):
     calibration_status: str
     inference_time: float
     explanation_method: str | None = None
+    clinical_suggestions: str | None = None
     created_at: datetime
 
     review_status: str

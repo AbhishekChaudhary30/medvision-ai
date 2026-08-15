@@ -4,7 +4,9 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pydicom
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -65,9 +67,22 @@ class ChestXRayDataset(Dataset):
         image_path = Path(row["original_path"])
         class_index = int(row["class_index"])
 
-        # Load image and convert grayscale to RGB to satisfy 3-channel models
-        # like ResNet/DenseNet
-        image = Image.open(image_path).convert("RGB")
+        # Handle DICOM or standard image
+        if image_path.suffix.lower() == ".dcm":
+            dicom = pydicom.dcmread(image_path)
+            pixel_array = dicom.pixel_array
+            
+            # Normalize to 0-255 if needed
+            if pixel_array.max() > 255:
+                pixel_array = (pixel_array / pixel_array.max() * 255).astype(np.uint8)
+            elif pixel_array.dtype != np.uint8:
+                pixel_array = pixel_array.astype(np.uint8)
+                
+            image = Image.fromarray(pixel_array).convert("RGB")
+        else:
+            # Fallback to normal image loading and convert grayscale to RGB to satisfy 3-channel models
+            # like ResNet/DenseNet
+            image = Image.open(image_path).convert("RGB")
 
         if self.transform is not None:
             image = self.transform(image)

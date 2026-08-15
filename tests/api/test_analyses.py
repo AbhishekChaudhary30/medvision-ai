@@ -1,10 +1,9 @@
 """Analysis API tests."""
 
-from unittest.mock import patch
-
+import os
+from pathlib import Path
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-
 
 def get_token(client: TestClient, email: str = "user@example.com") -> str:
     """Helper to get a token."""
@@ -13,61 +12,42 @@ def get_token(client: TestClient, email: str = "user@example.com") -> str:
     return response.json()["access_token"]
 
 
-@patch("app.api.v1.endpoints.analyses.process_and_predict")
-@patch("app.api.v1.endpoints.analyses.save_upload_file")
-def test_submit_analysis(mock_save, mock_predict, client: TestClient, db_session: Session, tmp_path):
+def create_dummy_jpeg(path: Path):
+    import numpy as np
+    from PIL import Image
+    np.random.seed(42)
+    arr = np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
+    Image.fromarray(arr).save(path)
+
+
+def test_submit_analysis(client: TestClient, db_session: Session):
     token = get_token(client)
+    
+    dummy_path = Path("test_api_image.jpg")
+    create_dummy_jpeg(dummy_path)
 
-    mock_save.return_value = tmp_path / "dummy.jpg"
-    mock_predict.return_value = {
-        "model_version": "v1.0",
-        "model_architecture": "custom_cnn",
-        "predicted_class": "PNEUMONIA",
-        "predicted_class_index": 1,
-        "probability_normal": 0.1,
-        "probability_pneumonia": 0.9,
-        "confidence": 0.9,
-        "threshold": 0.5,
-        "uncertainty_status": "LOW",
-        "entropy": 0.2,
-        "margin": 0.8,
-        "calibration_status": "UNAVAILABLE",
-        "inference_time": 150.0,
-    }
-
-    response = client.post(
-        "/api/v1/analyses", headers={"Authorization": f"Bearer {token}"}, files={"file": ("test.jpg", b"dummy image content", "image/jpeg")}
-    )
+    with open(dummy_path, "rb") as f:
+        response = client.post(
+            "/api/v1/analyses", headers={"Authorization": f"Bearer {token}"}, files={"file": ("test.jpg", f, "image/jpeg")}
+        )
 
     assert response.status_code == 201
     data = response.json()
-    assert data["predicted_class"] == "PNEUMONIA"
+    assert data["predicted_class"] in ["PNEUMONIA", "NORMAL"]
     assert "id" in data
+    
+    if dummy_path.exists():
+        dummy_path.unlink()
 
 
-@patch("app.api.v1.endpoints.analyses.process_and_predict")
-@patch("app.api.v1.endpoints.analyses.save_upload_file")
-def test_list_analyses(mock_save, mock_predict, client: TestClient, db_session: Session, tmp_path):
+def test_list_analyses(client: TestClient, db_session: Session):
     token = get_token(client, "list@example.com")
+    
+    dummy_path = Path("test_api_list.jpg")
+    create_dummy_jpeg(dummy_path)
 
-    mock_save.return_value = tmp_path / "dummy.jpg"
-    mock_predict.return_value = {
-        "model_version": "v1.0",
-        "model_architecture": "custom_cnn",
-        "predicted_class": "NORMAL",
-        "predicted_class_index": 0,
-        "probability_normal": 0.8,
-        "probability_pneumonia": 0.2,
-        "confidence": 0.8,
-        "threshold": 0.5,
-        "uncertainty_status": "LOW",
-        "entropy": 0.3,
-        "margin": 0.6,
-        "calibration_status": "UNAVAILABLE",
-        "inference_time": 100.0,
-    }
-
-    client.post("/api/v1/analyses", headers={"Authorization": f"Bearer {token}"}, files={"file": ("test.jpg", b"dummy image content", "image/jpeg")})
+    with open(dummy_path, "rb") as f:
+        client.post("/api/v1/analyses", headers={"Authorization": f"Bearer {token}"}, files={"file": ("test.jpg", f, "image/jpeg")})
 
     response = client.get("/api/v1/analyses", headers={"Authorization": f"Bearer {token}"})
 
@@ -75,4 +55,7 @@ def test_list_analyses(mock_save, mock_predict, client: TestClient, db_session: 
     data = response.json()
     assert data["total"] == 1
     assert len(data["items"]) == 1
-    assert data["items"][0]["predicted_class"] == "NORMAL"
+    assert data["items"][0]["predicted_class"] in ["PNEUMONIA", "NORMAL"]
+    
+    if dummy_path.exists():
+        dummy_path.unlink()

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -19,6 +19,7 @@ from app.schemas.analysis import (
 )
 from app.services.ml_service import process_and_predict, process_explainability, save_upload_file
 from app.services.report_service import generate_analysis_report
+from app.services.suggestions_service import generate_clinical_suggestions
 
 router = APIRouter()
 
@@ -29,6 +30,10 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 @router.post("", response_model=AnalysisResponse, status_code=status.HTTP_201_CREATED)
 def submit_analysis(
     file: UploadFile = File(...),
+    modality: str = Form("chest-xray"),
+    patient_age: int | None = Form(None),
+    patient_gender: str | None = Form(None),
+    clinical_notes: str | None = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -36,15 +41,12 @@ def submit_analysis(
     if file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported file type. Only JPEG and PNG are allowed.")
 
-    # We can't strictly enforce max size easily in pure FastAPI without reading,
-    # but we can rely on standard middleware or web server limits for production.
-
     # Save the file securely via the ML service
     saved_path = save_upload_file(file)
 
     try:
         # Run inference via ML service
-        result_dict = process_and_predict(saved_path, str(current_user.id))
+        result_dict = process_and_predict(saved_path, str(current_user.id), modality=modality)
     except ValueError as e:
         # Clean up file on failure
         saved_path.unlink(missing_ok=True)
@@ -52,6 +54,22 @@ def submit_analysis(
     except Exception:
         saved_path.unlink(missing_ok=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Inference engine failed") from None
+
+    # Include patient demographic data
+    result_dict["patient_age"] = patient_age
+    result_dict["patient_gender"] = patient_gender
+    result_dict["clinical_notes"] = clinical_notes
+
+    # Generate clinical suggestions
+    suggestions = generate_clinical_suggestions(
+        modality=result_dict["modality"], 
+        predicted_class=result_dict["predicted_class"], 
+        confidence=result_dict["confidence"],
+        patient_age=patient_age,
+        patient_gender=patient_gender,
+        clinical_notes=clinical_notes
+    )
+    result_dict["clinical_suggestions"] = suggestions
 
     # Persist the analysis
     analysis = Analysis(user_id=current_user.id, **result_dict)
@@ -201,3 +219,23 @@ def download_analysis_report(
     return Response(
         content=pdf_bytes, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"}
     )
+
+
+@router.delete("/{analysis_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_analysis(
+    analysis_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Permanently delete an analysis and its associated artifacts."""
+    analysis = db.get(Analysis, analysis_id)
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    if current_user.role == UserRole.USER and analysis.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this analysis")
+
+    db.delete(analysis)
+    db.commit()
+    
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

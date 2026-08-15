@@ -21,6 +21,11 @@ class Analysis(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
 
+    modality: Mapped[str] = mapped_column(String, default="chest-xray", nullable=False)
+    patient_age: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    patient_gender: Mapped[str | None] = mapped_column(String, nullable=True)
+    clinical_notes: Mapped[str | None] = mapped_column(String, nullable=True)
+    
     model_version: Mapped[str] = mapped_column(String, nullable=False)
     model_architecture: Mapped[str] = mapped_column(String, nullable=False)
 
@@ -38,6 +43,7 @@ class Analysis(Base):
 
     inference_time: Mapped[float] = mapped_column(Float, nullable=False)
     explanation_method: Mapped[str | None] = mapped_column(String, nullable=True)
+    clinical_suggestions: Mapped[str | None] = mapped_column(String, nullable=True)
 
     # Review fields
     review_status: Mapped[str] = mapped_column(String, default="NOT_REVIEWED", nullable=False)

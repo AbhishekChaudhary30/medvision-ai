@@ -21,6 +21,14 @@ export const login = async (username: string, password: string):Promise<TokenRes
   return data;
 };
 
+export const register = async (email: string, password: string):Promise<User> => {
+  const { data } = await apiClient.post<User>("/auth/register", {
+    email,
+    password
+  });
+  return data;
+};
+
 export const logout = () => {
   localStorage.removeItem("token");
 };

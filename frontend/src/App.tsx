@@ -6,6 +6,8 @@ import { HomePage } from "./pages/HomePage";
 import { AnalyzePage } from "./pages/AnalyzePage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
+import { ModelCenter } from "./pages/ModelCenter";
+import { BatchAnalysis } from "./pages/BatchAnalysis";
 
 function ProtectedRoute({ children, requireRoles }: { children?: React.ReactNode, requireRoles?: string[] }) {
   const { user, isLoading } = useAuth();
@@ -25,11 +27,13 @@ export function App() {
       <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/" element={<HomePage />} />
         <Route path="/analyze" element={<AnalyzePage />} />
+        <Route path="/batch" element={<BatchAnalysis />} />
         <Route path="/history" element={<HistoryPage />} />
       </Route>
 
       <Route element={<ProtectedRoute requireRoles={["REVIEWER", "ADMIN"]}><AppShell /></ProtectedRoute>}>
         <Route path="/reviews" element={<ReviewsPage />} />
+        <Route path="/models" element={<ModelCenter />} />
       </Route>
     </Routes>
   );

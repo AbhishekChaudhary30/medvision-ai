@@ -4,6 +4,8 @@ import argparse
 import logging
 from pathlib import Path
 
+import random
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -38,9 +40,21 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def set_seed(seed: int = 42) -> None:
+    """Set random seed for reproducibility."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    logger.info(f"Random seed set to {seed}")
+
+
 def main() -> None:
     """Run the training process."""
     args = parse_args()
+    set_seed(42)
 
     # 1. Device configuration
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

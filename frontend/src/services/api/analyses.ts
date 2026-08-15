@@ -1,9 +1,20 @@
 import { apiClient } from "./client";
 import { AnalysisResponse, PaginatedAnalyses } from "./types";
 
-export const uploadAnalysis = async (file: File): Promise<AnalysisResponse> => {
+export const uploadAnalysis = async (
+  file: File, 
+  modality: string = "chest-xray",
+  patientAge?: number,
+  patientGender?: string,
+  clinicalNotes?: string
+): Promise<AnalysisResponse> => {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("modality", modality);
+  
+  if (patientAge) formData.append("patient_age", patientAge.toString());
+  if (patientGender) formData.append("patient_gender", patientGender);
+  if (clinicalNotes) formData.append("clinical_notes", clinicalNotes);
   
   const { data } = await apiClient.post<AnalysisResponse>("/analyses", formData, {
     headers: {
@@ -61,4 +72,8 @@ export const downloadReport = async (id: string): Promise<void> => {
   // Clean up
   link.remove();
   URL.revokeObjectURL(fileURL);
+};
+
+export const deleteAnalysis = async (id: string): Promise<void> => {
+  await apiClient.delete(`/analyses/${id}`);
 };

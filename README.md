@@ -1,12 +1,10 @@
 # MedVision AI
 
-MedVision AI is a research and educational clinical decision-support prototype for explainable medical image analysis. The initial planned ML problem is chest X-ray binary classification for `NORMAL` and `PNEUMONIA`, but Phase 1 intentionally does not implement datasets, model training, inference, uploads, reports, authentication, or clinical workflows.
+MedVision AI is a research and educational clinical decision-support prototype for explainable medical image analysis. It performs chest X-ray binary classification for `NORMAL` and `PNEUMONIA` using an enterprise-grade ML architecture.
 
-## Current Phase
+## Architecture & Features
 
-Phase 1 - Foundation & Architecture.
-
-This repository currently establishes a clean monorepo foundation for future backend, frontend, ML, data, configuration, testing, Docker, DVC, documentation, and CI work.
+This repository implements a full-stack, production-ready AI platform:
 
 ## High-Level Architecture
 
@@ -123,15 +121,20 @@ docker compose up --build
 
 Configuration is environment-driven through `backend/app/core/config.py`. Use `.env.example` as a template and keep real `.env` files out of Git.
 
-## Future Roadmap
+## Completed Roadmap
 
 - Phase 1 - Foundation & Architecture
 - Phase 2 - Dataset & Deep Learning Data Pipeline
-- Phase 3 - CNN + Transfer Learning + Evaluation
-- Phase 4 - Explainability + Inference Engine
-- Phase 5 - FastAPI + PostgreSQL + Authentication/RBAC
-- Phase 6 - React Dashboard + Reports + Human Review
-- Phase 7 - Productionization + MLOps + Testing + CI/CD + Monitoring
+- Phase 3 - Data Leakage Prevention & Splits
+- Phase 4 - Advanced ML Pipeline & Transforms
+- Phase 5 - Benchmarking (ResNet, DenseNet, EfficientNet)
+- Phase 6 - Calibration, Quality Gates & OOD Detection
+- Phase 7 - Explainability (Grad-CAM)
+- Phase 8 - Model Registry
+- Phase 9 - FastAPI Backend + PostgreSQL
+- Phase 10 - React Frontend + Analysis Workspace
+- Phase 11 - Pytest Verification & E2E Testing
+- Phase 12 - Docker Deployment Ready
 
 ## Medical Disclaimer
 

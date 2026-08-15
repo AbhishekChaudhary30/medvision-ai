@@ -14,18 +14,26 @@ from ml.inference.schemas import InferenceResult
 
 logger = logging.getLogger(__name__)
 
-CLASS_NAMES = {0: "NORMAL", 1: "PNEUMONIA"}
-
-
 class InferenceEngine:
     """Production-ready inference engine for single-image classification."""
 
-    def __init__(self, bundle: ModelBundle, strict: bool = True):
-        self.bundle = bundle
-        self.model = self.bundle.load(strict=strict)
-        self.device = self.bundle.device
+    def __init__(self, bundle: ModelBundle = None, strict: bool = True, model=None, architecture: str = None, class_names: dict = None):
+        if bundle:
+            self.bundle = bundle
+            self.model = self.bundle.load(strict=strict)
+            self.device = self.bundle.device
+            self.architecture = self.bundle.get_architecture()
+            self.class_names = {0: "NORMAL", 1: "PNEUMONIA"} # Default for bundle
+        elif model and architecture and class_names:
+            self.bundle = None
+            self.model = model
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model.to(self.device)
+            self.architecture = architecture
+            self.class_names = class_names
+        else:
+            raise ValueError("Must provide either a ModelBundle or (model, architecture, class_names)")
 
-        self.architecture = self.bundle.get_architecture()
         self.explainability_svc = ExplainabilityService(model=self.model, architecture=self.architecture, use_cuda=(self.device.type == "cuda"))
 
         # We reuse the deterministic Phase 2 validation/test transforms
@@ -69,7 +77,7 @@ class InferenceEngine:
 
         # 3. Decision
         class_index = int(torch.argmax(probs).item())
-        class_name = CLASS_NAMES.get(class_index, "UNKNOWN")
+        class_name = self.class_names.get(class_index, "UNKNOWN")
         probability = float(probs[class_index].item())
 
         # 4. Uncertainty indicators

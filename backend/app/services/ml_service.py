@@ -10,42 +10,52 @@ from PIL import Image, UnidentifiedImageError
 from ml.inference.bundle import ModelBundle
 from ml.inference.engine import InferenceEngine
 
+from ml.inference.registry import ModalityRegistry
+
 logger = logging.getLogger(__name__)
 
-# Singleton instance of the engine
-_engine: InferenceEngine | None = None
+# Cache of engines per modality
+_engines: dict[str, InferenceEngine] = {}
 
 UPLOAD_DIR = Path("data/uploads")
 ARTIFACT_DIR = Path("data/artifacts")
 
 
-def initialize_engine(checkpoint_dir: str = "models/checkpoints", strict: bool = True):
-    """Load the ML engine once at application startup."""
-    global _engine
-    if _engine is None:
-        logger.info("Initializing ML Inference Engine from %s...", checkpoint_dir)
-        checkpoint_path = Path(checkpoint_dir)
-        bundle = ModelBundle(checkpoint_path)
-        _engine = InferenceEngine(bundle, strict=strict)
+def initialize_engine(checkpoint_dir: str = "ml/models/checkpoints", strict: bool = True, modality: str = "chest-xray"):
+    """Load the ML engine for a specific modality."""
+    global _engines
+    if modality not in _engines:
+        logger.info("Initializing ML Inference Engine for modality %s...", modality)
+        
+        model, architecture, class_names = ModalityRegistry.load_model(modality, strict=strict)
+        
+        if model is None:
+            # It's a bundle-based model (e.g. chest-xray)
+            checkpoint_path = Path(checkpoint_dir)
+            bundle = ModelBundle(checkpoint_path)
+            _engines[modality] = InferenceEngine(bundle=bundle, strict=strict)
+        else:
+            # It's a registry-provided model (e.g. brain-mri, skin-lesion)
+            _engines[modality] = InferenceEngine(model=model, architecture=architecture, class_names=class_names)
 
         # Ensure directories exist
         UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
         ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
-        logger.info("ML Engine initialized successfully.")
+        logger.info("ML Engine for %s initialized successfully.", modality)
 
 
-def get_engine() -> InferenceEngine:
-    """Get the initialized engine."""
-    if _engine is None:
-        # Fallback for local tests/development
-        initialize_engine(strict=False)
-    return _engine
+def get_engine(modality: str = "chest-xray") -> InferenceEngine:
+    """Get the initialized engine for the modality."""
+    if modality not in _engines:
+        # Fallback for local tests/development or lazy load
+        initialize_engine(strict=False, modality=modality)
+    return _engines[modality]
 
 
-def process_and_predict(file_path: Path, sample_id: str) -> dict:
+def process_and_predict(file_path: Path, sample_id: str, modality: str = "chest-xray") -> dict:
     """Run prediction on the given image file using Phase 4 engine."""
-    engine = get_engine()
+    engine = get_engine(modality)
 
     try:
         image = Image.open(file_path)
@@ -56,14 +66,19 @@ def process_and_predict(file_path: Path, sample_id: str) -> dict:
         raise ValueError("Invalid image file format") from None
 
     result = engine.predict(image=image, sample_id=sample_id, explain=False)
+    
+    # Generic probability mapping (assuming class index 1 is the 'positive' or anomaly case for all)
+    prob_normal = 1.0 - result.probability if result.class_index == 1 else result.probability
+    prob_anomaly = result.probability if result.class_index == 1 else 1.0 - result.probability
 
     return {
-        "model_version": engine.bundle.metadata.get("version", "v1.0"),
+        "modality": modality,
+        "model_version": getattr(engine.bundle, "metadata", {}).get("version", "v1.0") if engine.bundle else "v1.0",
         "model_architecture": engine.architecture,
         "predicted_class": result.class_name,
         "predicted_class_index": result.class_index,
-        "probability_normal": 1.0 - result.probability if result.class_index == 1 else result.probability,
-        "probability_pneumonia": result.probability if result.class_index == 1 else 1.0 - result.probability,
+        "probability_normal": prob_normal,
+        "probability_pneumonia": prob_anomaly, # reusing this column for 'anomaly probability' temporarily
         "confidence": result.confidence_score,
         "threshold": 0.5,  # Default binary threshold
         "uncertainty_status": "HIGH" if result.entropy > 0.5 else "LOW",
@@ -74,9 +89,9 @@ def process_and_predict(file_path: Path, sample_id: str) -> dict:
     }
 
 
-def process_explainability(file_path: Path, target_class: int, method: str = "gradcam") -> dict | None:
+def process_explainability(file_path: Path, target_class: int, method: str = "gradcam", modality: str = "chest-xray") -> dict | None:
     """Run explainability on the image."""
-    engine = get_engine()
+    engine = get_engine(modality)
 
     try:
         image = Image.open(file_path)
