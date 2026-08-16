@@ -1,5 +1,5 @@
 import gradio as gr
-import spaces
+
 import json
 import logging
 from pathlib import Path
@@ -32,8 +32,7 @@ body { background-color: #0f172a; color: #f8fafc; }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 """
 
-# The inference function must be decorated with @spaces.GPU for ZeroGPU spaces
-@spaces.GPU
+# The inference function must not use @spaces.GPU for Vercel API access
 def analyze_image(image, modality, age, gender, notes):
     if image is None:
         return "Please upload an image.", None, None, gr.update(visible=False)
