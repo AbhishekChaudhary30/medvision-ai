@@ -60,6 +60,16 @@ class Settings(BaseSettings):
             raise ValueError(msg)
         return normalized
 
+    @field_validator("database_url")
+    @classmethod
+    def fix_database_url_scheme(cls, value: str) -> str:
+        """Automatically fix PaaS PostgreSQL URLs to use psycopg v3 dialect."""
+        if value.startswith("postgres://"):
+            return value.replace("postgres://", "postgresql+psycopg://", 1)
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+psycopg://", 1)
+        return value
+
 
 @lru_cache
 def get_settings() -> Settings:
