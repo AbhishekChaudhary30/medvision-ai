@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
-    initialize_engine(strict=False)  # Use False for easy dev start
+    # initialize_engine(strict=False)  # Disabled to fix Render Free tier timeout
     yield
 
 
