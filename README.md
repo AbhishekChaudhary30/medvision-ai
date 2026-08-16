@@ -1,3 +1,14 @@
+---
+title: Medvision Api
+emoji: 🏢
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: 6.24.0
+python_version: '3.12'
+app_file: app.py
+pinned: false
+---
 # MedVision AI
 
 MedVision AI is a research and educational clinical decision-support prototype for explainable medical image analysis. It performs chest X-ray binary classification for `NORMAL` and `PNEUMONIA` using an enterprise-grade ML architecture.
