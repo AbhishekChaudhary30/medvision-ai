@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Hardcode to Hugging Face to ignore Vercel's cached Render VITE_API_URL
-const API_URL = "https://abhishek1130-medvision-api.hf.space/call";
+// Standard Vite environment variable, now defaults to Hugging Face Gradio API
+const API_URL = import.meta.env.VITE_API_URL || "https://abhishek1130-medvision-api.hf.space/call";
 
 export const apiClient = axios.create({
   baseURL: API_URL,

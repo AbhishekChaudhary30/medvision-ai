@@ -371,7 +371,7 @@ export function AnalyzePage() {
                     <AlertCircle className="h-6 w-6 flex-shrink-0 text-red-500 mt-0.5" />
                     <div>
                       <h4 className="font-bold text-red-800 text-base">Processing Failed</h4>
-                      <p className="mt-1 opacity-90">Please check your network connection and ensure the image format is supported (JPEG/PNG).</p>
+                      <p className="mt-1 opacity-90">{uploadMutation.error instanceof Error ? uploadMutation.error.message : "Please check your network connection and ensure the image format is supported (JPEG/PNG)."}</p>
                     </div>
                   </div>
                 )}

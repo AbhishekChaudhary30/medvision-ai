@@ -41,12 +41,21 @@ export const uploadAnalysis = async (
     const data = result.data as any[];
     
     const summary = data[0] as string;
+    
+    // Check if the Hugging Face space returned an error string instead of a valid summary
+    if (summary && summary.startsWith("Error analyzing image")) {
+      throw new Error(summary);
+    }
+    
     const heatmap = data[1] as any; // Usually a URL or base64 object from Gradio
     const rawJsonStr = data[2] as string;
     
     let parsedJson: any = {};
     try {
-      parsedJson = JSON.parse(rawJsonStr);
+      const parsed = JSON.parse(rawJsonStr);
+      if (parsed) {
+        parsedJson = parsed;
+      }
     } catch(e) {}
     
     const url = URL.createObjectURL(file);

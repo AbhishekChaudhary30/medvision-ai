@@ -79,10 +79,7 @@ def analyze_image(image, modality, age, gender, notes):
         - **Uncertainty:** {result.get('uncertainty_status', 'LOW')}
         
         ### Clinical Suggestions
-        {suggestions.get('ai_interpretation', '')}
-        
-        **Recommendations:**
-        {chr(10).join(['- ' + r for r in suggestions.get('recommendations', [])])}
+        {suggestions}
         """
         
         # Return heatmap if available
