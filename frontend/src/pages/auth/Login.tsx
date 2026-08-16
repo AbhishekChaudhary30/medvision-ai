@@ -26,12 +26,13 @@ export function Login() {
     try {
       if (isRegisterMode) {
         await register(email, password);
+        // Automatically log in after registration
       }
       const data = await login(email, password);
       setAuthToken(data.access_token);
       navigate("/");
     } catch (err: any) {
-      navigate("/"); // ALWAYS navigate to dashboard on error in serverless mode
+      setError(err.response?.data?.detail || "Authentication failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -41,11 +42,18 @@ export function Login() {
     setError("");
     setIsLoading(true);
     try {
-      await login("demo@medvision.com", "password123");
-      setAuthToken("mock-token-123");
+      try {
+        const data = await login("demo@medvision.com", "password123");
+        setAuthToken(data.access_token);
+      } catch (err) {
+        // If demo user doesn't exist, create it then login
+        await register("demo@medvision.com", "password123");
+        const data = await login("demo@medvision.com", "password123");
+        setAuthToken(data.access_token);
+      }
       navigate("/");
     } catch (err: any) {
-      navigate("/"); // ALWAYS navigate to dashboard
+      setError("Demo environment is currently unavailable.");
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +67,7 @@ export function Login() {
             <Activity className="h-6 w-6 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight text-primary">
-            MedVision AI (Serverless)
+            MedVision AI
           </CardTitle>
           <CardDescription className="text-muted">
             {isRegisterMode ? "Create a new account" : "Sign in to your account"}
@@ -149,7 +157,7 @@ export function Login() {
               className="w-full h-11 text-base font-medium border-gray-200 text-slate-700 bg-slate-50 hover:bg-slate-100"
             >
               <Sparkles className="mr-2 h-4 w-4 text-primary" />
-              Explore V3 Serverless Demo
+              Explore Demo without register
             </Button>
             
           </CardFooter>

@@ -10,7 +10,6 @@
     "smoke:build": "node scripts/smoke-build.mjs"
   },
   "dependencies": {
-    "@gradio/client": "^2.5.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
     "@vitejs/plugin-react": "^6.0.5",
