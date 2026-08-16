@@ -3,10 +3,7 @@ title: Medvision Api
 emoji: 🏢
 colorFrom: blue
 colorTo: green
-sdk: gradio
-sdk_version: 6.24.0
-python_version: '3.12'
-app_file: run.py
+sdk: docker
 pinned: false
 ---
 # MedVision AI
