@@ -10,6 +10,9 @@ pinned: false
 ---
 # MedVision AI
 
+**?? LIVE DEMO:** [MedVision Enterprise PACS (Hugging Face Space)](https://abhishek1130-medvision-api.hf.space)
+
+
 MedVision AI is a research and educational clinical decision-support prototype for explainable medical image analysis. It performs chest X-ray binary classification for `NORMAL` and `PNEUMONIA` using an enterprise-grade ML architecture.
 
 ## Architecture & Features
