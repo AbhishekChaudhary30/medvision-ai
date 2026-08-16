@@ -5,7 +5,7 @@ colorFrom: blue
 colorTo: green
 sdk: gradio
 python_version: '3.12'
-app_file: app.py
+app_file: gradio_app.py
 pinned: false
 ---
 # MedVision AI
