@@ -1,0 +1,47 @@
+warning: in the working copy of '.github/workflows/ci.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/api/v1/endpoints/analyses.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/api/v1/router.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/core/config.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/core/exceptions.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/core/logging.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/core/security.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/db/migrations/env.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/db/migrations/versions/ea8a48de3896_add_review_fields_to_analysis.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/db/migrations/versions/ff30f165d1b1_initial_migration.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/dependencies/auth.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/analysis.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/models/user.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/schemas/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/services/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/services/ml_service.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/services/report_service.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docker-compose.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pyproject.toml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/integration/test_health.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/unit/test_config.py', LF will be replaced by CRLF the next time Git touches it
+ .github/workflows/ci.yml                           |  4 [32m++++[m
+ backend/app/api/v1/endpoints/analyses.py           | 25 [32m+++++++++++[m[31m--------[m
+ backend/app/api/v1/router.py                       | 13 [32m++++++++[m[31m--[m
+ backend/app/core/config.py                         |  4 [32m++++[m
+ backend/app/core/exceptions.py                     |  4 [32m++[m[31m--[m
+ backend/app/core/logging.py                        | 28 [32m++++++++++++++++++[m[31m----[m
+ backend/app/core/security.py                       |  6 [32m++[m[31m---[m
+ backend/app/db/migrations/env.py                   | 12 [32m++++[m[31m------[m
+ .../ea8a48de3896_add_review_fields_to_analysis.py  | 13 [32m+++++[m[31m-----[m
+ .../versions/ff30f165d1b1_initial_migration.py     | 11 [32m++++[m[31m-----[m
+ backend/app/dependencies/auth.py                   |  4 [32m++[m[31m--[m
+ backend/app/main.py                                | 22 [32m+++++++++++++[m[31m----[m
+ backend/app/models/__init__.py                     |  2 [32m+[m[31m-[m
+ backend/app/models/analysis.py                     | 12 [32m++++++[m[31m----[m
+ backend/app/models/user.py                         | 15 [32m+++++++++[m[31m---[m
+ backend/app/schemas/__init__.py                    |  9 [32m+++++[m[31m--[m
+ backend/app/services/__init__.py                   |  8 [32m++++++[m[31m-[m
+ backend/app/services/ml_service.py                 | 10 [32m++++[m[31m----[m
+ backend/app/services/report_service.py             |  6 [32m++[m[31m---[m
+ docker-compose.yml                                 | 10 [32m++++++++[m
+ pyproject.toml                                     | 10 [32m+++++[m[31m---[m
+ tests/integration/test_health.py                   |  4 [32m+++[m[31m-[m
+ tests/unit/test_config.py                          |  2 [32m+[m[31m-[m
+ 23 files changed, 161 insertions(+), 73 deletions(-)
