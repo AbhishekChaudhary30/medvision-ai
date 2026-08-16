@@ -46,7 +46,7 @@ export function AnalyzePage() {
   
   // Patient Context
   const [age, setAge] = useState<string>("");
-  const [gender, setGender] = useState<string>("M");
+  const [gender, setGender] = useState<string>("Male");
   const [notes, setNotes] = useState<string>("");
 
   const [file, setFile] = useState<File | null>(null);
@@ -117,7 +117,7 @@ export function AnalyzePage() {
     setCategory("X-Ray");
     setModality("chest-xray");
     setAge("");
-    setGender("M");
+    setGender("Male");
     setNotes("");
     setFile(null);
     setPreview(null);
@@ -271,9 +271,9 @@ export function AnalyzePage() {
                       onChange={e => setGender(e.target.value)}
                       className="flex h-14 w-full rounded-xl border-2 border-slate-100 bg-white/50 px-4 py-2 text-lg font-medium transition-colors focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none"
                     >
-                      <option value="M">Male</option>
-                      <option value="F">Female</option>
-                      <option value="O">Other</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -393,7 +393,7 @@ export function AnalyzePage() {
                 <div>
                   <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Patient Profile</h3>
                   <p className="text-xl font-bold text-slate-800">
-                    {result.patient_age ? `${result.patient_age} Years` : "Age N/A"} <span className="text-slate-300 mx-2">|</span> {result.patient_gender === 'M' ? 'Male' : result.patient_gender === 'F' ? 'Female' : 'Other'}
+                    {result.patient_age ? `${result.patient_age} Years` : "Age N/A"} <span className="text-slate-300 mx-2">|</span> {result.patient_gender || "Other"}
                   </p>
                 </div>
               </div>
