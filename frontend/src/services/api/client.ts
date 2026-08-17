@@ -1,7 +1,9 @@
 import axios from "axios";
 
-// Standard Vite environment variable
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+import { appConfig } from "../../config/env";
+
+// Use the standardized config (which checks VITE_API_BASE_URL)
+const API_URL = `${appConfig.apiBaseUrl}/api/v1`;
 
 export const apiClient = axios.create({
   baseURL: API_URL,

@@ -5,9 +5,11 @@ import { Button } from "../components/ui/button";
 import { Loader2, CheckCircle2, ShieldAlert } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
+import { appConfig } from "../config/env";
+
 // In a real app, these would be imported from a central api.ts file
 const fetchModels = async () => {
-  const res = await fetch("http://localhost:8000/api/v1/models", {
+  const res = await fetch(`${appConfig.apiBaseUrl}/api/v1/models`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
   });
   if (!res.ok) throw new Error("Failed to fetch models");
@@ -15,7 +17,7 @@ const fetchModels = async () => {
 };
 
 const promoteModel = async (versionTag: string) => {
-  const res = await fetch(`http://localhost:8000/api/v1/models/${versionTag}/promote`, {
+  const res = await fetch(`${appConfig.apiBaseUrl}/api/v1/models/${versionTag}/promote`, {
     method: "POST",
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
   });

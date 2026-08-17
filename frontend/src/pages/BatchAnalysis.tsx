@@ -23,7 +23,7 @@ export function BatchAnalysis() {
       const formData = new FormData();
       files.forEach((file) => formData.append("files", file));
 
-      const res = await fetch("http://localhost:8000/api/v1/batch", {
+      const res = await fetch(`${appConfig.apiBaseUrl}/api/v1/batch`, {
         method: "POST",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,
