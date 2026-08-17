@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { appConfig } from "../config/env";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { UploadCloud, CheckCircle, Loader2 } from "lucide-react";
