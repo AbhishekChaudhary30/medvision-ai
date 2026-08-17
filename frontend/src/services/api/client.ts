@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Standard Vite environment variable, now defaults to Hugging Face Gradio API
-const API_URL = import.meta.env.VITE_API_URL || "https://abhishek1130-medvision-api.hf.space/call";
+// Standard Vite environment variable
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -10,13 +10,24 @@ export const apiClient = axios.create({
   },
 });
 
-// Mock interceptor to handle mock responses for paths that don't exist in Gradio
+// Interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
-  // Add a fake token just in case
-  if (config.headers) {
-    config.headers.Authorization = `Bearer mock-token-123`;
+  const token = localStorage.getItem("token");
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// We don't need the 401 interceptor since we don't have a backend auth anymore
+// Interceptor to handle 401s
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      // Could trigger a custom event here to log the user out
+      window.dispatchEvent(new Event("auth-unauthorized"));
+    }
+    return Promise.reject(error);
+  }
+);
